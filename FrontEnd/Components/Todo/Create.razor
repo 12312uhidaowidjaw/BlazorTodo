@@ -1,0 +1,29 @@
+﻿@inject IModalService modal
+
+<div>
+    <input type="text" placeholder="Title" @bind="@title"/>
+    <input type="datetime" placeholder="Limit Day" @bind="dueDate"/>
+</div>  
+
+
+<button @onclick="CreateTodo">Submit</button>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance? BlazoredModal { get; set; } = default;
+
+    private string? title;
+    private string? dueDate;
+
+    private async Task CreateTodo()
+    {
+        if (!string.IsNullOrEmpty(title))
+        {
+            var newTodo = new TodoDto
+                {
+                    Title = title,
+                    FormattedDate = dueDate
+                };
+            await BlazoredModal!.CloseAsync(ModalResult.Ok(newTodo));
+        }
+    }
+}

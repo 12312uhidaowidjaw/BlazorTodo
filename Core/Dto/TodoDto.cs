@@ -4,9 +4,11 @@
     {
         public string? Id { get; set; }
 
-        public required string Title { get; set; }
+        public string Title { get; set; }
 
         public DateTime? DueDate { get; set; }
+
+        public string? FormattedDate { get; set; }
 
         public bool? Finished { get; set; } = false;
     }

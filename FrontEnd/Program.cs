@@ -1,8 +1,15 @@
+using Blazored.Modal;
+using FrontEnd.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddHttpClient();
+builder.Services.AddTransient<TodoService>();
+builder.Services.AddBlazoredModal();
+
 
 var app = builder.Build();
 

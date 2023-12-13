@@ -1,7 +1,6 @@
 ﻿using Core.Dto;
 using Core.Interface.Service;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace API.Controllers
 {
@@ -21,8 +20,8 @@ namespace API.Controllers
         {
             try
             {
-                await _service.Create(newItemDto);
-                return Created("", "Created successfully");
+                var itemDto = await _service.Create(newItemDto);
+                return Created("", itemDto);
             }
             catch (Exception ex)
             {
@@ -49,8 +48,8 @@ namespace API.Controllers
         {
             try
             {
-                await _service.Update(itemDto);
-                return Ok("Updated successfully");
+                var item = await _service.Update(itemDto);
+                return Ok(item);
             }
             catch (Exception ex)
             {

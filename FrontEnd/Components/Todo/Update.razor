@@ -1,0 +1,22 @@
+﻿@inject IModalService modal
+
+<div>
+    <input type="text" placeholder="@todo!.Id" readonly />
+    <div>
+        <input type="text" placeholder="@todo!.Title" @bind="@todo!.Title" />
+        <input type="date" placeholder="@todo!.DueDate" @bind="@todo!.DueDate" />
+    </div>
+</div>
+
+<button @onclick="UpdateTodo">Submit</button>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance? BlazoredModal { get; set; } = default;
+
+    [Parameter] public TodoDto? todo { get; set; }
+
+    private async Task UpdateTodo()
+    {
+        await BlazoredModal!.CloseAsync(ModalResult.Ok(todo));
+    }
+}

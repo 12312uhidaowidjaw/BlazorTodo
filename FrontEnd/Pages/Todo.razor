@@ -1,0 +1,179 @@
+﻿@page "/todo"
+@using Core.Dto
+@using FrontEnd.Components.Todo;
+
+@inject TodoService service
+@inject IModalService modal
+
+<div class="container">
+    <h1>Todo List</h1>
+
+    <div>
+        <button @onclick="Create" class="btn btn-primary action-button">
+            Create
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p style="color: red;">@errorMessage</p>
+    }
+
+    <div class="todo-list">
+        @if (list is not null && list.Any())
+        {
+            @foreach (var todo in list)
+            {
+                <div class="todo-item">
+                    <p>@todo.Title</p>
+                    @if (todo.FormattedDate is not null)
+                    {
+                        <p>Due limit: @todo.FormattedDate</p>
+                    }
+                    <label>
+                        <input type="checkbox" @onclick="()=>UpdateFinished(todo)" checked="@todo.Finished" />
+                        Completed
+                    </label>
+
+                    <button @onclick="()=> Update(todo)" class="edit-button">Edit</button>
+                    <button @onclick="()=> Delete(todo.Id!)" class="delete-button">Delete</button>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No todos available.</p>
+        }
+    </div>
+</div>
+
+@code {
+    private List<TodoDto>? list;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTodoList();
+    }
+
+    private async Task Create()
+    {
+        var createForm = modal.Show<Create>("Create");
+        var result = await createForm.Result;
+
+        if (result.Confirmed)
+        {
+            var input = (TodoDto)result.Data!;
+
+            try
+            {
+                var newItem = await service.Create(input);
+                list?.Add(newItem!);
+            }
+            catch(Exception ex)
+            {
+                errorMessage = $"Error creating todo: {ex.Message}";
+            }
+
+        }
+    }
+
+    private async Task LoadTodoList()
+    {
+        try
+        {
+            list = await service.GetAll();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading todos: {ex.Message}";
+        }
+    }
+
+    private async Task Update(TodoDto todo)
+    {
+        var parameters = new ModalParameters().Add(nameof(todo), todo);
+        var updateForm = modal.Show<Update>("Update", parameters);
+        var result = await updateForm.Result;
+
+        if (result.Confirmed)
+        {
+
+            var input = (TodoDto)result.Data!;
+
+            try
+            {
+                var item = await service.Update(todo);
+                var index = list!.FindIndex(t => t.Id == todo.Id);
+
+                if(index != -1)
+                {
+                    list[index] = input;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Error updating todo: {ex.Message}";
+            }
+        }
+    }
+
+    private async Task UpdateFinished(TodoDto todo)
+    {
+        todo.Finished = !todo.Finished;
+        var item = await service.Update(todo);
+        var index = list!.FindIndex(t => t.Id == todo.Id);
+
+        if (index != -1)
+        {
+            list[index] = todo;
+        }
+    }
+
+    private async Task Delete(string id)
+    {
+        try
+        {
+            await service.Delete(id);
+            list?.RemoveAll(t => t.Id == id);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error deleting todo: {ex.Message}";
+        }
+    }
+}
+
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
+        overflow: hidden;
+    }
+
+    .todo-list {
+        flex: 1;
+        overflow-y: auto;
+        margin-top: 20px;
+    }
+
+    .todo-item {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+    .edit-button,
+    .delete-button {
+        margin-left: 10px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .action-button {
+        width: 100px;
+    }
+    
+</style>

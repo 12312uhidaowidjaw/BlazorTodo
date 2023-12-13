@@ -7,10 +7,10 @@ namespace Core.Model
         [Key]
         public string? Id { get; set; }
 
-        public required string Title { get; set; }
+        public string Title { get; set; }
 
         public DateTime? DueDate { get; set; }
 
-        public required bool Finished { get; set; }
+        public bool Finished { get; set; }
     }
 }
